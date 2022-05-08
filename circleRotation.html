@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Move rectangle in canvas based on click events , keyboard events , touch events or move events</title>
+    </head>
+    <noscript>Sorry, your browser does not support JavaScript!</noscript>
+    <style>
+        #box {
+            margin-left: 100px;
+            margin-top: 50px;
+            width: 400px;
+        }
+    </style>
+    <body>
+        <div id="box">
+            <canvas  id="clockCanvas" height="270" width="480" style="background-color: #f1f1f1; border: 1px solid #d3d3d3;"">
+                Your broswer doesn't support canvas.
+            </canvas>
+        </div>
+    <script>
+
+
+        var c = document.getElementById("clockCanvas");
+        var ctx = c.getContext("2d");
+
+
+
+        function drawShape() {
+            redRectangle = new createComponent(150, 80, 25, 25 , "red", 0, -1 , 1);
+            redRectangle.drawRectangle(ctx);
+        }
+
+        function clearSpeed () {
+            console.log("clearSpeed ")
+            redRectangle.resetSpeed();
+        }
+
+        function reDrawShape () {
+            clearCanvas(ctx);
+            ctx.save();
+            redRectangle.newPos();
+            //Notw we first translate canvas to center of object we want to rotate , we can also do that without translating 
+            //but then calculations will be too complex hence this way is preferred
+            ctx.translate(redRectangle.x  + redRectangle.width / 2 , redRectangle.y + redRectangle.height / 2);
+            ctx.rotate(redRectangle.angle);
+            ctx.fillStyle = redRectangle.color;
+            ctx.fillRect(-redRectangle.width / 2, -redRectangle.height / 2, redRectangle.width, redRectangle.height);
+            ctx.restore();
+        }
+
+
+
+        function createComponent(x, y, width, height, color, speedX, speedY, angle){
+            this.x = x;
+            this.y = y;
+            this.height = height;
+            this.width = width;
+            this.color = color;
+            this.speedX = speedX ?? 0 ; 
+            this.speedY = speedY ?? 0 ;
+            this.angle = angle ?? 0; 
+            this.drawRectangle = function (ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x,this.y,this.width,this.height);
+                ctx.closePath();
+            }
+            this.newPos = function () {
+                this.angle += Math.PI /180;;
+                this.x -= this.speedY * Math.sin(this.angle);
+                this.y += this.speedY * Math.cos(this.angle);
+            }
+            this.resetSpeed = function () {
+                this.angle = 0;
+            }
+        }
+
+        function clearCanvas (ctx) {
+            ctx.beginPath();
+            ctx.fillStyle= "#f1f1f1";
+            ctx.fillRect(0,0, 480, 270);
+            ctx.fill();
+        }
+  
+
+        drawShape();
+        setInterval(reDrawShape, 20);
+
+
+         
+         
+    </script>
+    </body>
+</html>
+
+
+

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Clock Design using canvas</title>
+    </head>
+    <noscript>Sorry, your browser does not support JavaScript!</noscript>
+    <style>
+        #box {
+            margin-left: 100px;
+            margin-top: 50px;
+            background-color: black;
+            width: 400px;
+
+        }
+    </style>
+    <body>
+        <div id="box">
+            <canvas  id="clockCanvas" height="400" width="400">
+                Your broswer doesn't support canvas.
+            </canvas>
+        </div>
+    <script>
+
+
+        var c = document.getElementById("clockCanvas");
+        var ctx = c.getContext("2d");
+        ctx.translate(200,200);
+
+        setInterval(drawClock, 1000);
+
+        function drawClock() {
+            drawFace(ctx);
+            drawNumbers(ctx);
+            drawTime(ctx);
+        }
+
+
+        function drawFace (ctx) {
+            var grad;
+                ctx.beginPath();
+                ctx.strokeWidth = 2;
+                //This below line is very important as everytime after 1 second when we redraw the shape , this clears up the entire canvas
+                //and hence previous shape gets cleared else we had to clearRect etc but this works like great hack.
+                ctx.fillStyle = 'white';
+                ctx.arc(0, 0 , 160 , 0, 360);
+                ctx.fill();
+                grad = ctx.createRadialGradient(0,0,150, 0,0,170);
+                grad.addColorStop(0, 'black');
+                grad.addColorStop(0.5, 'white');
+                grad.addColorStop(1, 'black');
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 15;
+                ctx.stroke();
+                ctx.beginPath(); 
+                ctx.fillStyle = 'black';
+                ctx.arc(0,0 , 20 , 0, 360);
+                ctx.fill();
+               
+        }
+  
+
+
+        function drawNumbers (ctx) {
+            ctx.beginPath();
+            ctx.strokeStyle = "black";
+            ctx.font= "24px arial";
+
+            for(i = 0; i < 12 ; i++){
+                ctx.beginPath();
+                let angle = (90 - (i * 30)) * Math.PI / 180;
+                let text =  i === 0 ? "12" : i;
+                let r = 134;
+
+                let coords = getCoordinates(r, angle);
+
+               
+                var measure = ctx.measureText(text);
+
+
+                ctx.fillText(text, coords[0] - measure.width / 2 , coords[1]  + 12);
+                ctx.stroke();
+            }
+        };
+
+
+        function getCoordinates (r, angle) {
+            let x = r * Math.cos(angle);
+             //Since y direction in canvas is opposite
+             let y = - r * Math.sin(angle);
+             return [x,y];
+        }
+
+
+
+        function drawTime (ctx) {
+
+           
+            var time = new Date();
+            var hour  = time.getHours();
+            var minutes = time.getMinutes();
+            var seconds = time.getSeconds();
+
+            let secondsCoords = null;
+            let minutesCoords = null;
+            let hourCoords = null;
+
+
+           if(hour > 12){
+               hour = hour - 12;
+           }
+
+            let secondsR = 146;
+            let minutesR = 126;
+            let hourR = 80;
+
+            if(seconds === 60){
+                seconds = 0;
+            }
+
+            let secondAngle =  (90 - (6 * seconds)) * Math.PI / 180; 
+            console.log("secondAngle ", secondAngle);
+            secondsCoords = getCoordinates(secondsR, secondAngle);
+            console.log("secondsX, secondsY ", secondsCoords);
+
+            ctx.beginPath();
+            ctx.lineCap = "round";
+            ctx.lineWidth = 2;
+            ctx.moveTo(0,0);
+            ctx.lineTo(secondsCoords[0], secondsCoords[1]);
+            ctx.stroke();
+
+            if(minutes === 60){
+                minutes = 0;
+            }
+
+            let minutesAngle =  (90 - (6 * minutes)) * Math.PI / 180; 
+            minutesCoords = getCoordinates(minutesR, minutesAngle);
+
+            ctx.beginPath();
+            ctx.moveTo(0,0);
+            ctx.lineWidth = 5;
+            ctx.lineTo(minutesCoords[0], minutesCoords[1]);
+            ctx.stroke();
+
+
+            if(hour === 12){
+                hour = 0;
+            }
+
+            let hourAngle =  (90 -  ((30 * hour) + (minutes / 60 * 30))) * Math.PI / 180; 
+            hourCoords = getCoordinates(hourR, hourAngle);
+
+            ctx.beginPath();
+            ctx.moveTo(0,0);
+            ctx.lineWidth = 8;
+            ctx.lineTo(hourCoords[0],hourCoords[1]);
+            ctx.stroke();
+
+
+        }
+
+         
+         
+    </script>
+    </body>
+</html>

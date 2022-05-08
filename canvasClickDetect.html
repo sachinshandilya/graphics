@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Detect click within canvas and move rectangle accordingly</title>
+    </head>
+    <noscript>Sorry, your browser does not support JavaScript!</noscript>
+    <style>
+        body {
+            margin: 0px;
+        }
+        #box {
+            margin-left: 100px;
+            margin-top: 50px;
+            width: 400px;
+        }
+        #controlBox {
+            margin-left: 100px;
+            margin-top: 50px;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #leftRightBox {
+            display: flex;
+        }
+        button {
+            margin-left: 4px;
+            margin-right: 14px;
+            margin-top: 14px;
+        }
+    </style>
+    <body>
+        <div id="box">
+            <canvas  id="clockCanvas" height="270" width="480" style="background-color: #f1f1f1; border: 1px solid #d3d3d3;"">
+                Your broswer doesn't support canvas.
+            </canvas>
+        </div>
+    <script>
+
+
+        var c = document.getElementById("clockCanvas");
+        var ctx = c.getContext("2d");
+
+
+        window.addEventListener("mousedown" , function(e) {
+            let coordinatesX = e.pageX - 100; //margin-left is 100px
+            let coordinatesY = e.pageY - 50; //margin-top is 50px
+
+            if(coordinatesX >= br1.x && coordinatesX <= br1.x + br1.width && coordinatesY >= br1.y && coordinatesY <= br1.y +  br1.height ){
+                handleLeft();
+            }
+            if(coordinatesX >= br2.x && coordinatesX <= br2.x + br2.width && coordinatesY >= br2.y && coordinatesY <= br2.y +  br2.height ){
+                handleUp();
+            }
+            if(coordinatesX >= br3.x && coordinatesX <= br3.x + br3.width && coordinatesY >= br3.y && coordinatesY <= br3.y +  br3.height ){
+                handleRight();
+            }
+            if(coordinatesX >= br4.x && coordinatesX <= br4.x + br4.width && coordinatesY >= br4.y && coordinatesY <= br4.y +  br4.height ){
+                handleDown();
+            }
+        })
+
+        window.addEventListener("mouseup" , function() {
+            clearSpeed();
+        })
+
+
+
+        function drawShape() {
+            redRectangle = new createComponent(60, 150, 30, 30 , "red");
+            redRectangle.drawRectangle(ctx);
+            br1 = new createComponent(50, 50, 30, 30 , "blue");
+            br1.drawRectangle(ctx);
+            br2 = new createComponent(80, 20, 30, 30 , "blue");
+            br2.drawRectangle(ctx);
+            br3 = new createComponent(110, 50, 30, 30 , "blue");
+            br3.drawRectangle(ctx);
+            br4 = new createComponent(80, 80, 30, 30 , "blue");
+            br4.drawRectangle(ctx);
+        }
+
+        function clearSpeed () {
+            console.log("clearSpeed ")
+            redRectangle.resetSpeed();
+        }
+
+        function reDrawShape () {
+            clearCanvas(ctx);
+            redRectangle.newPos();
+            redRectangle.drawRectangle(ctx);
+            br1.drawRectangle(ctx);
+            br2.drawRectangle(ctx);
+            br3.drawRectangle(ctx);
+            br4.drawRectangle(ctx);
+        }
+
+        function handleUp () {
+            redRectangle.speedY = -1;
+        }
+
+        function handleDown () {
+            redRectangle.speedY = 1;
+        }
+
+
+        function handleLeft () {
+            redRectangle.speedX = -1;
+        }
+
+
+        function handleRight () {
+            redRectangle.speedX = 1;
+        }
+
+
+        window.addEventListener("keydown", function(e) {
+                console.log("keydown ", e );
+                if(e && e.keyCode === 37){
+                    handleLeft();
+                }
+                if(e && e.keyCode === 38){
+                    handleUp();
+                }
+                if(e && e.keyCode === 39){
+                    handleRight();
+                }
+                if(e && e.keyCode === 40){
+                    handleDown();
+                }
+        });
+
+
+        window.addEventListener("keyup", function(e) {
+            console.log("keyup ", e );
+            if(e && e.keyCode === 37){
+                    clearSpeed();
+                }
+                if(e && e.keyCode === 38){
+                    clearSpeed();
+                }
+                if(e && e.keyCode === 39){
+                    clearSpeed();
+                }
+                if(e && e.keyCode === 40){
+                    clearSpeed();
+                }
+        });
+
+
+        /*
+         mousemover event on window
+         mousemove , mousedown , mouseup
+
+         key events 
+         keydown , keyup
+
+         touch addEventListener
+         touchstart , touchend , touchmove
+
+
+         If we apply direclty to an elemnent appned on
+         for e.g. onmousedown , onmouseup
+
+         Syntax of React 
+         onMouseDown , onMouseUp
+        */
+
+
+        function createComponent(x, y, width, height, color, speedX, speedY){
+            this.x = x;
+            this.y = y;
+            this.height = height;
+            this.width = width;
+            this.color = color;
+            this.speedX = speedX ?? 0 ; 
+            this.speedY = speedY ?? 0 ; 
+            this.drawRectangle = function (ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x,this.y,this.width,this.height);
+                ctx.closePath();
+            }
+            this.newPos = function () {
+                this.x += this.speedX;
+                this.y += this.speedY;
+            }
+            this.resetSpeed = function () {
+                this.speedX = 0;
+                this.speedY = 0;
+            }
+        }
+
+        function clearCanvas (ctx) {
+            ctx.beginPath();
+            ctx.fillStyle= "#f1f1f1";
+            ctx.fillRect(0,0, 480, 270);
+            ctx.fill();
+        }
+  
+
+        drawShape();
+        setInterval(reDrawShape, 20);
+
+
+         
+         
+    </script>
+    </body>
+</html>
+
+
+

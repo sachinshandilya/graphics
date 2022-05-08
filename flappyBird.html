@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Obstacle Game with continuous moving obstacle</title>
+    </head>
+    <noscript>Sorry, your browser does not support JavaScript!</noscript>
+    <style>
+        #box {
+            margin-left: 100px;
+            margin-top: 50px;
+            width: 400px;
+        }
+        #controlBox {
+            margin-left: 100px;
+            margin-top: 50px;
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #leftRightBox {
+            display: flex;
+        }
+        #restartBox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ecebeb;
+            display: none;
+            opacity: 0.8;
+            flex-direction: column;
+        }
+        #restart {
+            background: #b3a8aa;
+            color: black;
+            width: 100px;
+            height: 30px;
+            margin-left: 18px;
+        }
+        button {
+            margin-left: 4px;
+            margin-right: 14px;
+            margin-top: 14px;
+        }
+    </style>
+    <body>
+        <div id="box">
+            <canvas  id="clockCanvas" height="270" width="480" style="background-color: #f1f1f1; border: 1px solid #d3d3d3;"">
+                Your broswer doesn't support canvas.
+            </canvas>
+            <div id="restartBox">
+                <div style="font-size: 20px; font-weight: 900;">Game Over</div>
+                <button id="restart" onclick="handleRestart()">Restart</button>
+            </div>
+        </div>
+
+        <div id="controlBox">
+            <button onmousedown="handleUp()" onmouseup="clearSpeed()">UP</button>
+            <button onmousedown="handleDown()" onmouseup="clearSpeed()">DOWN</button>
+        </div>
+    <script>
+
+
+        var c = document.getElementById("clockCanvas");
+        var ctx = c.getContext("2d");
+        var canvasHeight = 270;
+        var canvasWidth = 480;
+        var collides = false;
+        var obstacles = [];
+        var indexToBeChecked = 0;
+        var gameScore = 0;
+
+        function handleRestart () {
+            window.location.reload();
+        }
+
+
+        function checkForCollide (redRectangle,greenObstacle) {
+            var minAx = redRectangle.x;
+            var maxAx = redRectangle.x + redRectangle.width;
+            var minAy = redRectangle.y;
+            var maxAy = redRectangle.y + redRectangle.height;
+            var minBx = greenObstacle.x;
+            var maxBx = greenObstacle.x + greenObstacle.width;
+            var minBy = greenObstacle.y;
+            var maxBy = greenObstacle.y + greenObstacle.height;
+
+            var aLeftOfB = maxAx < minBx;
+            var aRightOfB = minAx > maxBx;
+            var aAboveB = minAy > maxBy;
+            var aBelowB = maxAy < minBy;
+
+            return !( aLeftOfB || aRightOfB || aAboveB || aBelowB );
+        }
+
+        function calculateIndexTobeChecked () {
+            if(obstacles[indexToBeChecked].x + obstacles[indexToBeChecked].width < redRectangle.x){
+                indexToBeChecked += 2;
+            }
+        }
+
+        function drawText () {
+            ctx.beginPath();
+            ctx.font = "16px Arial";
+            ctx.fillStyle="black";
+            ctx.fillText("SCORE : " + gameScore, 250, 50);
+        }
+        
+
+        function drawShape() {
+            redRectangle = new createComponent(30, 100, 30, 30 , "red");
+            redRectangle.drawRectangle(ctx);
+            drawText();
+        }
+
+
+        function drawObtsacle() {
+            var obs1Height = Math.random() * 200;
+            //10 is a buffer so blocks dont get too close
+            var obs2Height = Math.random() * (canvasHeight - obs1Height -redRectangle.height - 10);
+            console.log("obs1Height ", obs1Height);
+            console.log("obs2Height ", obs2Height);
+            console.log("obs1 ", 200, canvasHeight - obs1Height, 10, obs1Height);
+            console.log("obs2 ", 200, 0,  10, obs2Height);
+
+            var obs1 = new obstacleComponent(500, canvasHeight - obs1Height, 10, obs1Height, "green", -1);
+            var obs2 = new obstacleComponent(500, 0,  10, obs2Height,  "green", -1);
+            obstacles.push(obs1);
+            obstacles.push(obs2);
+            console.log("obs1 ", obs1)
+            obs1.drawRectangle(ctx);
+            obs2.drawRectangle(ctx);
+        }
+
+        drawShape();
+        var interval = setInterval(reDrawShape, 20);
+        drawObtsacle();
+        var obstacleInterval = setInterval(drawObtsacle, 3700);
+
+        function clearSpeed () {
+            console.log("clearSpeed ")
+            redRectangle.resetSpeed();
+        }
+
+        function resetIntervalAndShowRestartButton () {
+            clearInterval(interval);
+            clearInterval(obstacleInterval);
+            document.getElementById("restartBox").style.display = "flex";
+        }
+
+        function reDrawShape () {
+            calculateIndexTobeChecked();
+            if(collides) {
+                resetIntervalAndShowRestartButton();
+                return;
+            };
+            gameScore += 1;
+            collides = checkForCollide(redRectangle, obstacles[indexToBeChecked]) || checkForCollide(redRectangle, obstacles[indexToBeChecked + 1]);
+            if(collides){
+                resetIntervalAndShowRestartButton();
+                return;
+            }
+            clearCanvas(ctx);
+            redRectangle.newPos();
+            redRectangle.drawRectangle(ctx);
+            for(var i = 0; i < obstacles.length ; i++) {
+                obstacles[i].newPos();
+                obstacles[i].drawRectangle(ctx);
+            }
+            drawText();
+        }
+
+        function handleUp () {
+            redRectangle.speedY = -1;
+        }
+
+        function handleDown () {
+            redRectangle.speedY = 1;
+        }
+
+
+        function obstacleComponent(x,y, width, height, color, speedX){
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.color = color;
+            this.speedX = speedX;
+            this.height = height;
+            this.drawRectangle = function (ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x,this.y,this.width,this.height);
+                ctx.closePath();
+            }
+            this.newPos = function () {
+                this.x += this.speedX;
+            }
+        }
+
+        function createComponent(x, y, width, height, color, speedX, speedY){
+            this.x = x;
+            this.y = y;
+            this.height = height;
+            this.width = width;
+            this.color = color;
+            this.speedX = speedX ?? 0 ; 
+            this.speedY = speedY ?? 0 ; 
+            this.drawRectangle = function (ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x,this.y,this.width,this.height);
+                ctx.closePath();
+            }
+            this.newPos = function () {
+                this.x += this.speedX;
+                this.y += this.speedY;
+            }
+            this.resetSpeed = function () {
+                this.speedX = 0;
+                this.speedY = 0;
+            }
+        }
+
+        function clearCanvas (ctx) {
+            ctx.beginPath();
+            ctx.fillStyle= "#f1f1f1";
+            ctx.fillRect(0,0, canvasWidth, canvasHeight);
+            ctx.fill();
+        }
+  
+
+
+         
+         
+    </script>
+    </body>
+</html>
+
+
+

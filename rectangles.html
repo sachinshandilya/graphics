@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Draw multiple configurable rectangles on canvas</title>
+    </head>
+    <noscript>Sorry, your browser does not support JavaScript!</noscript>
+    <style>
+        #box {
+            margin-left: 100px;
+            margin-top: 50px;
+            width: 400px;
+        }
+    </style>
+    <body>
+        <div id="box">
+            <canvas  id="clockCanvas" height="270" width="480" style="background-color: #f1f1f1; border: 1px solid #d3d3d3;"">
+                Your broswer doesn't support canvas.
+            </canvas>
+        </div>
+    <script>
+
+
+        var c = document.getElementById("clockCanvas");
+        var ctx = c.getContext("2d");
+
+
+
+        function drawShape() {
+            redRectangle = new createComponent(30, 100, 30, 30 , "red");
+            redRectangle.drawRectangle(ctx);
+            blueRectangle = new createComponent(50, 140, 30, 30 , "blue");
+            blueRectangle.drawRectangle(ctx);
+            greenRectangle = new createComponent(50, 200, 30, 30 , "green");
+            greenRectangle.drawRectangle(ctx);
+        }
+
+        function reDrawShape () {
+            clearCanvas(ctx);
+            redRectangle.increaseX();
+            redRectangle.increaseY();
+            redRectangle.drawRectangle(ctx);
+            blueRectangle.increaseX(2);
+            blueRectangle.drawRectangle(ctx);
+            greenRectangle.decreaseY();
+            greenRectangle.increaseX();
+            greenRectangle.drawRectangle(ctx);
+        }
+
+        function createComponent(x, y, width, height, color){
+            this.x = x;
+            this.y = y;
+            this.height = height;
+            this.width = width;
+            this.color = color;
+            this.drawRectangle = function (ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x,this.y,this.width,this.height);
+                ctx.closePath();
+            }
+            this.increaseX = function(amount) {
+                this.x += amount ?? 1;
+            }
+            this.increaseY = function(amount) {
+                this.y += amount ?? 1;
+            }
+            this.decreaseX = function(amount) {
+                this.x -= amount ?? 1;
+            }
+            this.decreaseY = function(amount) {
+                this.y -= amount ?? 1;
+            }
+        }
+
+        function clearCanvas (ctx) {
+            ctx.beginPath();
+            ctx.fillStyle= "#f1f1f1";
+            ctx.fillRect(0,0, 480, 270);
+            ctx.fill();
+        }
+  
+
+        drawShape();
+        setInterval(reDrawShape, 20);
+
+
+         
+         
+    </script>
+    </body>
+</html>

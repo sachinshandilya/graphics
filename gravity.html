@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Apply gravity on ball. Not fully dynamic as made some hacks bcz not applied very accurate kinematics formulas and necessary conversions.</title>
+    </head>
+    <noscript>Sorry, your browser does not support JavaScript!</noscript>
+    <style>
+        #box {
+            margin-left: 100px;
+            margin-top: 50px;
+            width: 400px;
+        }
+    </style>
+    <body>
+        <div id="box">
+            <canvas  id="clockCanvas" height="270" width="480" style="background-color: #f1f1f1; border: 1px solid #d3d3d3;"">
+                Your broswer doesn't support canvas.
+            </canvas>
+        </div>
+    <script>
+
+
+        var c = document.getElementById("clockCanvas");
+        var ctx = c.getContext("2d");
+        var canvasWidth = 480;
+        var canvasHeight = 270;
+        ctx.translate(0, canvasHeight);
+
+        var time = 0;
+        var bounceRate = 0.7;
+        var acceleration = 10;
+
+
+        function drawShape() {
+            redRectangle = new createComponent(200, -230, 30, 30 , "red", 0, acceleration);
+            redRectangle.drawRectangle(ctx);
+        }
+
+        function clearSpeed () {
+            console.log("clearSpeed ")
+            redRectangle.resetSpeed();
+        }
+
+        function reDrawShape () {
+            clearCanvas(ctx);
+            time += 2 / 1000;
+            redRectangle.newPos();
+            redRectangle.drawRectangle(ctx);
+        }
+
+
+        function createComponent(x, y, width, height, color, speedY, acceleration){
+            this.x = x;
+            this.y = y;
+            this.height = height;
+            this.width = width;
+            this.color = color;
+            this.speedY = speedY ?? 0 ; 
+            this.acceleration = acceleration ?? 10;
+            this.distanceTravelled = 0;
+            this.bounce = bounceRate;
+            this.drawRectangle = function (ctx) {
+                ctx.beginPath();
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x,this.y,this.width,this.height);
+                ctx.closePath();
+            }
+            this.newPos = function () {
+
+
+
+                //some hack  , in ideal code we need to find the actual time formula which relates with bounce , 
+                //time , speed ,acceleration and then decide it shouldn't go any further , or apply very accurate formulas
+                if(time > 0.4) {
+                    this.y = -this.height;
+                    return;
+                }
+
+                //check if collided with earth or bottom boundary
+                if(this.y + this.height > 0){
+                    this.speedY = -(this.speedY * this.bounce);
+                    this.y = -this.height;
+                } else {
+                    this.speedY = this.speedY + (this.acceleration * time);
+                    // this.acceleration = 10;
+                }
+
+                this.distanceTravelled = (((this.speedY * time) + (0.5 * this.acceleration * time * time)));
+                this.y =  this.y + this.distanceTravelled;
+
+            }
+            this.resetSpeed = function () {
+                this.speedY = 0;
+            }
+        }
+
+        function clearCanvas (ctx) {
+            ctx.beginPath();
+            ctx.fillStyle= "#f1f1f1";
+            ctx.fillRect(0,0, 480, -270);
+            ctx.fill();
+        }
+  
+
+        drawShape();
+        setInterval(reDrawShape, 20);
+
+
+         
+         
+    </script>
+    </body>
+</html>
+
+
+
